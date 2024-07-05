@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from escpos import printer
 
@@ -21,7 +22,17 @@ custom_footer1 = "CUSTOM FOOTER 1"
 custom_footer2 = "CUSTOM FOOTER 2"
 custom_footer3 = "CUSTOM FOOTER 3"
 
-p = printer.Usb(0x0DD4, 0x0286, in_ep=0x81, out_ep=0x02)
+escpos_printer = os.getenv("ESCPOS_PRINTER", "bixolon")
+if escpos_printer == "bixolon":
+    p = printer.Usb(0x1504, 0x0103, in_ep=0x81, out_ep=0x02)
+    present_receipt_command = p.ln
+elif escpos_printer == "modus":
+    p = printer.Usb(0x0DD4, 0x0286, in_ep=0x81, out_ep=0x02)
+    present_receipt_command = lambda: p._raw(b"\x1c\x50\x00\x00")
+else:
+    raise ValueError(
+        f"Unknown printer: {escpos_printer}, set the ESCPOS_PRINTER environment variable"
+    )
 
 p.set(align="center", bold=False, invert=False, normal_textsize=True)
 
@@ -80,4 +91,4 @@ p.textln(custom_footer2)
 p.text(custom_footer3)
 
 p.cut()
-p._raw(b"\x1c\x50\x00\x00")
+present_receipt_command()
