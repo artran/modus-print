@@ -1,9 +1,11 @@
 import datetime
-import os
 
 from escpos import printer
 from escpos.exceptions import DeviceNotFoundError
 
+###############################################################################
+# Config
+###############################################################################
 machine_name = "Recycling Machine"
 address = "1234 Elm St, Springfield, IL 62701"
 currency = "£"
@@ -22,7 +24,12 @@ session_end_time = datetime.datetime.now()
 custom_footer1 = "CUSTOM FOOTER 1"
 custom_footer2 = "CUSTOM FOOTER 2"
 custom_footer3 = "CUSTOM FOOTER 3"
+image_path = "recyclever.png"
 
+
+###############################################################################
+# Detect Printer
+###############################################################################
 # Bixolon
 print("Trying Bixolon")
 try:
@@ -43,6 +50,10 @@ except DeviceNotFoundError:
 
 assert p is not None and p.is_online()
 
+
+###############################################################################
+# Print Receipt
+###############################################################################
 p.set(align="center", bold=False, invert=False, normal_textsize=True)
 
 p.textln(machine_name)
@@ -57,6 +68,8 @@ p.textln(custom_header1)
 p.textln(custom_header2)
 p.textln(custom_header3)
 p.ln()
+
+p.image(image_path)
 
 p.set(bold=True, invert=True, double_height=True, double_width=True)
 p.ln()
