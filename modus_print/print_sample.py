@@ -31,24 +31,25 @@ image_path = "recyclever.png"
 # Detect Printer
 ###############################################################################
 # Bixolon
+found = False
 print("Trying Bixolon")
 try:
     p = printer.Usb(0x1504, 0x0103, in_ep=0x81, out_ep=0x02)
     present_receipt_command = p.ln
     print(p.is_online())
+    found = True
 except DeviceNotFoundError:
     print("Device not found")
 
-# Modus
-print("Trying Modus")
-try:
-    p = printer.Usb(0x0DD4, 0x0286, in_ep=0x81, out_ep=0x02)
-    print(p.is_online())
-    present_receipt_command = lambda: p._raw(b"\x1c\x50\x00\x00")
-except DeviceNotFoundError:
-    print("Device not found")
-
-assert p is not None and p.is_online()
+if not found:
+    # Modus
+    print("Trying Modus")
+    try:
+        p = printer.Usb(0x0DD4, 0x0286, in_ep=0x81, out_ep=0x02)
+        print(p.is_online())
+        present_receipt_command = lambda: p._raw(b"\x1c\x50\x00\x00")
+    except DeviceNotFoundError:
+        print("Device not found")
 
 
 ###############################################################################
