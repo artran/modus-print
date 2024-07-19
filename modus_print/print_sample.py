@@ -2,6 +2,7 @@ import datetime
 import os
 
 from escpos import printer
+from escpos.exceptions import DeviceNotFoundError
 
 machine_name = "Recycling Machine"
 address = "1234 Elm St, Springfield, IL 62701"
@@ -22,17 +23,25 @@ custom_footer1 = "CUSTOM FOOTER 1"
 custom_footer2 = "CUSTOM FOOTER 2"
 custom_footer3 = "CUSTOM FOOTER 3"
 
-escpos_printer = os.getenv("ESCPOS_PRINTER", "bixolon")
-if escpos_printer == "bixolon":
+# Bixolon
+print("Trying Bixolon")
+try:
     p = printer.Usb(0x1504, 0x0103, in_ep=0x81, out_ep=0x02)
     present_receipt_command = p.ln
-elif escpos_printer == "modus":
+    print(p.is_online())
+except DeviceNotFoundError:
+    print("Device not found")
+
+# Modus
+print("Trying Modus")
+try:
     p = printer.Usb(0x0DD4, 0x0286, in_ep=0x81, out_ep=0x02)
+    print(p.is_online())
     present_receipt_command = lambda: p._raw(b"\x1c\x50\x00\x00")
-else:
-    raise ValueError(
-        f"Unknown printer: {escpos_printer}, set the ESCPOS_PRINTER environment variable"
-    )
+except DeviceNotFoundError:
+    print("Device not found")
+
+assert p is not None and p.is_online()
 
 p.set(align="center", bold=False, invert=False, normal_textsize=True)
 
